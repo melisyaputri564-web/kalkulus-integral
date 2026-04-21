@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>WAKTU DESA - Kalkulator Distribusi Air (Pagi, Siang, Sore)</title>
+    <title>WAKTU DESA - Kalkulator Distribusi Air Otomatis</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- KaTeX untuk render rumus matematika -->
@@ -62,53 +62,56 @@
 
         .judul-desa span {
             background: #f4b942;
-            font-size: 1.4rem;
-            padding: 0.2rem 0.9rem;
+            font-size: 1.8rem;
+            padding: 0.3rem 1.2rem;
             border-radius: 60px;
             color: #2c3e1f;
             font-weight: bold;
+            text-shadow: none;
         }
 
-        /* Gaya untuk pemilih waktu (jam dinamis) */
         .time-selector {
-            background: #00000055;
-            backdrop-filter: blur(8px);
-            padding: 0.3rem;
+            background: #00000066;
+            backdrop-filter: blur(10px);
+            padding: 0.4rem;
             border-radius: 60px;
             display: flex;
-            gap: 0.3rem;
+            gap: 0.5rem;
             border: 1px solid #ffdd99;
         }
         .time-btn {
             background: transparent;
             border: none;
-            padding: 0.5rem 1.2rem;
+            padding: 0.7rem 1.5rem;
             border-radius: 50px;
             font-weight: bold;
-            font-size: 1rem;
-            color: #f9e0a0;
+            font-size: 1.2rem;
+            color: #ffecb3;
             cursor: pointer;
             transition: 0.2s;
             font-family: monospace;
         }
         .time-btn.active {
             background: #f4b942;
-            color: #2c3e1f;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            color: #1e3c2c;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         .time-btn:hover:not(.active) {
-            background: #ffffff55;
+            background: #ffffff77;
             color: white;
         }
         .jam-display {
             font-family: monospace;
             font-weight: bold;
-            font-size: 1.4rem;
-            background: #00000044;
-            padding: 0.3rem 1rem;
-            border-radius: 50px;
+            font-size: 1.8rem;
+            background: #00000066;
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
             color: #ffecb3;
             margin-left: 0.5rem;
+            letter-spacing: 2px;
+            border: 1px solid #ffdd99;
         }
 
         .relief-row {
@@ -205,7 +208,7 @@
             margin: 1.5rem 0;
             align-items: flex-end;
         }
-        .input-group { flex: 1; min-width: 160px; }
+        .input-group { flex: 1; min-width: 180px; }
         .input-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #2f4d2d; }
         .input-group input {
             width: 100%;
@@ -231,6 +234,10 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         button:hover { background: #1e4620; transform: scale(0.98); }
+        .laju-readonly {
+            background-color: #f0f0e0;
+            cursor: default;
+        }
 
         .hasil-volume {
             background: #fff1cf;
@@ -274,8 +281,10 @@
         @media (max-width: 700px) {
             .hero { flex-direction: column; align-items: center; text-align: center; }
             .judul-desa { font-size: 2rem; }
+            .judul-desa span { font-size: 1.4rem; }
             .card-hasil .value { font-size: 1.3rem; }
             .time-selector { width: 100%; justify-content: center; }
+            .jam-display { font-size: 1.3rem; text-align: center; }
         }
     </style>
 </head>
@@ -292,11 +301,10 @@
                 <button class="time-btn" data-session="siang">☀️ SIANG</button>
                 <button class="time-btn" data-session="sore">🌇 SORE</button>
             </div>
-            <div class="jam-display" id="jamDisplay">Jam operasional aktif</div>
+            <div class="jam-display" id="jamDisplay">🕒 Jam operasional aktif</div>
         </div>
     </div>
 
-    <!-- TIGA RELIEF: PAGI, SIANG, SORE -->
     <div class="relief-row">
         <div class="relief-card pagi" data-session="pagi">
             <div class="relief-title">🌤️ PAGI RELIEF</div>
@@ -319,7 +327,6 @@
         </div>
     </div>
 
-    <!-- KALKULATOR INTEGRAL -->
     <div class="kalkulus-section">
         <div class="rumus-box">
             <h3>🧮 RUMUS KALKULUS INTEGRAL DALAM DISTRIBUSI AIR</h3>
@@ -338,17 +345,34 @@
         </div>
 
         <div class="form-grid">
-            <div class="input-group"><label>👥 Jumlah Warga (jiwa)</label><input type="number" id="jumlahWarga" value="350" step="10" min="1"></div>
-            <div class="input-group"><label>🚛 Jumlah Truk per Sesi</label><input type="number" id="trukPerSesi" value="4" step="1" min="1"></div>
-            <div class="input-group"><label>📦 Kapasitas 1 Truk (Liter)</label><input type="number" id="kapasitasTruk" value="6000" step="500" min="100"></div>
+            <div class="input-group">
+                <label>👥 Jumlah Warga (jiwa)</label>
+                <input type="number" id="jumlahWarga" value="350" step="10" min="1">
+            </div>
+            <div class="input-group">
+                <label>🚛 Jumlah Truk per Sesi</label>
+                <input type="number" id="trukPerSesi" value="4" step="1" min="1">
+            </div>
+            <div class="input-group">
+                <label>📦 Kapasitas 1 Truk (Liter)</label>
+                <input type="number" id="kapasitasTruk" value="6000" step="500" min="100">
+            </div>
             <div><button id="hitungIntegralBtn">🧮 HITUNG DENGAN INTEGRAL</button></div>
         </div>
 
-        <!-- Parameter laju aliran Q (liter/jam) untuk setiap sesi -->
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.5rem 0 0.8rem; background:#fff2df; padding: 0.8rem; border-radius: 1.2rem;">
-            <div style="flex:1; min-width:130px"><label style="font-weight:bold;">🌅 Laju Pagi Q₁ (L/jam):</label><input type="number" id="lajuPagi" value="4200" step="100" style="width:100%; border-radius:30px; padding:8px;"></div>
-            <div style="flex:1; min-width:130px"><label style="font-weight:bold;">☀️ Laju Siang Q₂ (L/jam):</label><input type="number" id="lajuSiang" value="3800" step="100" style="width:100%; border-radius:30px; padding:8px;"></div>
-            <div style="flex:1; min-width:130px"><label style="font-weight:bold;">🌙 Laju Sore Q₃ (L/jam):</label><input type="number" id="lajuSore" value="4500" step="100" style="width:100%; border-radius:30px; padding:8px;"></div>
+            <div style="flex:1; min-width:130px">
+                <label style="font-weight:bold;">🌅 Laju Pagi Q₁ (L/jam):</label>
+                <input type="number" id="lajuPagi" class="laju-readonly" readonly style="width:100%; border-radius:30px; padding:8px; background:#f0f0e0;">
+            </div>
+            <div style="flex:1; min-width:130px">
+                <label style="font-weight:bold;">☀️ Laju Siang Q₂ (L/jam):</label>
+                <input type="number" id="lajuSiang" class="laju-readonly" readonly style="width:100%; border-radius:30px; padding:8px; background:#f0f0e0;">
+            </div>
+            <div style="flex:1; min-width:130px">
+                <label style="font-weight:bold;">🌙 Laju Sore Q₃ (L/jam):</label>
+                <input type="number" id="lajuSore" class="laju-readonly" readonly style="width:100%; border-radius:30px; padding:8px; background:#f0f0e0;">
+            </div>
         </div>
 
         <div class="hasil-volume" id="hasilPanel">
@@ -359,33 +383,59 @@
         </div>
         
         <div class="step-integral" id="stepIntegral">
-            ✨ Klik tombol hitung untuk melihat detail perhitungan integral & distribusi
+            ✨ Masukkan jumlah warga, truk per sesi, dan kapasitas truk. Laju aliran akan dihitung otomatis.
         </div>
     </div>
     <div class="footnote">
-        🧮 ∫ Q(t) dt : Integral tentu laju aliran terhadap waktu | Volume total air = penjumlahan luas area di bawah kurva laju per sesi
+        🧮 ∫ Q(t) dt : Integral tentu laju aliran terhadap waktu | Laju aliran dihitung otomatis berdasarkan kebutuhan air warga (100 liter/orang/hari + kehilangan 20%)
     </div>
 </div>
 
 <script>
     let chartInstance = null;
-    let currentSession = 'pagi'; // pagi, siang, sore
+    let currentSession = 'pagi';
 
-    // Mapping session ke jam yang ditampilkan
     const sessionTimeMap = {
         pagi: { display: '08:00 PAGI', jam: '08:00', label: 'PAGI' },
         siang: { display: '13:00 SIANG', jam: '13:00', label: 'SIANG' },
         sore: { display: '17:00 SORE', jam: '17:00', label: 'SORE' }
     };
 
+    // FUNGSI FORMAT ANGKA - MENGHILANGKAN .0 DI BELAKANG
+    // Contoh: 11577600.0 -> 11.577.600
+    // Contoh: 11577600 -> 11.577.600
+    // Contoh: 119.14 -> 119.14 (tetap)
+    function formatNumber(value) {
+        if (value === undefined || value === null || isNaN(value)) return '0';
+        
+        // Cek apakah angka tersebut adalah bilangan bulat (tidak ada pecahan)
+        // Misal: 11577600.0 -> true, 119.14 -> false
+        if (value % 1 === 0) {
+            // Angka bulat: langsung format dengan pemisah ribuan, tanpa desimal
+            return Math.round(value).toLocaleString('id-ID');
+        } else {
+            // Angka desimal: tampilkan dengan 2 angka di belakang koma
+            // Tapi hilangkan trailing zeros jika ada
+            let formatted = value.toFixed(2);
+            // Hapus .00 jika muncul
+            if (formatted.endsWith('.00')) {
+                return Math.round(value).toLocaleString('id-ID');
+            }
+            // Hapus trailing zero di belakang koma (misal 119.10 -> 119.1)
+            formatted = formatted.replace(/\.?0+$/, '');
+            // Format dengan pemisah ribuan untuk bagian depan koma
+            let parts = formatted.split('.');
+            parts[0] = parseInt(parts[0]).toLocaleString('id-ID');
+            return parts.join('.');
+        }
+    }
+
     function updateUIBasedOnSession(session) {
-        // Update jam besar di header
         const dynamicJam = document.getElementById('dynamicJam');
         const jamDisplay = document.getElementById('jamDisplay');
         if (dynamicJam) dynamicJam.innerText = sessionTimeMap[session].display;
         if (jamDisplay) jamDisplay.innerText = `🕒 Jam ${sessionTimeMap[session].jam} - sesi ${sessionTimeMap[session].label}`;
         
-        // Update active class pada tombol
         document.querySelectorAll('.time-btn').forEach(btn => {
             if (btn.getAttribute('data-session') === session) {
                 btn.classList.add('active');
@@ -394,7 +444,6 @@
             }
         });
         
-        // Update highlight pada kartu relief
         document.querySelectorAll('.relief-card').forEach(card => {
             if (card.getAttribute('data-session') === session) {
                 card.classList.add('active-session');
@@ -402,6 +451,128 @@
                 card.classList.remove('active-session');
             }
         });
+    }
+
+    function hitungLajuOtomatis(jumlahWarga, trukPerSesi, kapasitasTruk) {
+        const kebutuhanPerWargaPerHari = 100;
+        let totalKebutuhanHarian = jumlahWarga * kebutuhanPerWargaPerHari;
+        totalKebutuhanHarian = totalKebutuhanHarian * 1.2;
+        const totalJamOperasional = 10;
+        let lajuRataRata = totalKebutuhanHarian / totalJamOperasional;
+        
+        let lajuPagiOtomatis = lajuRataRata * 1.05;
+        let lajuSiangOtomatis = lajuRataRata * 0.85;
+        let lajuSoreOtomatis = lajuRataRata * 1.10;
+        
+        lajuPagiOtomatis = Math.max(500, Math.round(lajuPagiOtomatis / 100) * 100);
+        lajuSiangOtomatis = Math.max(300, Math.round(lajuSiangOtomatis / 100) * 100);
+        lajuSoreOtomatis = Math.max(500, Math.round(lajuSoreOtomatis / 100) * 100);
+        
+        return { lajuPagiOtomatis, lajuSiangOtomatis, lajuSoreOtomatis };
+    }
+
+    function hitungDistribusiAir() {
+        let jumlahWarga = parseFloat(document.getElementById('jumlahWarga').value);
+        let trukPerSesi = parseInt(document.getElementById('trukPerSesi').value);
+        let kapasitasTruk = parseFloat(document.getElementById('kapasitasTruk').value);
+        
+        if (isNaN(jumlahWarga) || jumlahWarga <= 0) jumlahWarga = 1;
+        if (isNaN(trukPerSesi) || trukPerSesi <= 0) trukPerSesi = 1;
+        if (isNaN(kapasitasTruk) || kapasitasTruk <= 0) kapasitasTruk = 1000;
+        
+        let { lajuPagiOtomatis, lajuSiangOtomatis, lajuSoreOtomatis } = hitungLajuOtomatis(jumlahWarga, trukPerSesi, kapasitasTruk);
+        
+        document.getElementById('lajuPagi').value = lajuPagiOtomatis;
+        document.getElementById('lajuSiang').value = lajuSiangOtomatis;
+        document.getElementById('lajuSore').value = lajuSoreOtomatis;
+        
+        let lajuPagi = lajuPagiOtomatis;
+        let lajuSiang = lajuSiangOtomatis;
+        let lajuSore = lajuSoreOtomatis;
+        
+        const durasiPagi = 4, durasiSiang = 3, durasiSore = 3;
+        let volumePagi = lajuPagi * durasiPagi;
+        let volumeSiang = lajuSiang * durasiSiang;
+        let volumeSore = lajuSore * durasiSore;
+        let totalVolumeAir = volumePagi + volumeSiang + volumeSore;
+        
+        let totalTrukTersedia = trukPerSesi * 3;
+        let airPerTruk = totalTrukTersedia > 0 ? totalVolumeAir / totalTrukTersedia : 0;
+        let airPerWarga = jumlahWarga > 0 ? totalVolumeAir / jumlahWarga : 0;
+        let totalTrukDibutuhkan = Math.ceil(totalVolumeAir / kapasitasTruk);
+        
+        // MENGGUNAKAN formatNumber UNTUK MENGHILANGKAN .0
+        document.getElementById('totalVolumeLiter').innerHTML = formatNumber(totalVolumeAir) + " Liter";
+        document.getElementById('airPerTruk').innerHTML = formatNumber(airPerTruk) + " Liter";
+        document.getElementById('airPerWarga').innerHTML = formatNumber(airPerWarga) + " Liter";
+        document.getElementById('totalTrukTerpakai').innerHTML = formatNumber(totalTrukDibutuhkan);
+        
+        updateChart(volumePagi, volumeSiang, volumeSore);
+        
+        const rumusDiv = document.querySelector('.rumus-lengkap');
+        if (rumusDiv) {
+            rumusDiv.innerHTML = `
+                $$ V_{\\text{total}} = \\int_{0}^{T} Q(t) \\, dt = \\sum_{i=1}^{3} \\left( \\int_{t_{i-1}}^{t_i} Q_i \\, dt \\right) $$
+                <br><br>
+                $$ \\text{Diketahui: } Q_{\\text{pagi}} = ${lajuPagi.toFixed(0)} \\, \\text{L/jam},\\ Q_{\\text{siang}} = ${lajuSiang.toFixed(0)} \\, \\text{L/jam},\\ Q_{\\text{sore}} = ${lajuSore.toFixed(0)} \\, \\text{L/jam} $$
+                $$ \\Delta t_{\\text{pagi}} = 4\\,\\text{jam},\\ \\Delta t_{\\text{siang}} = 3\\,\\text{jam},\\ \\Delta t_{\\text{sore}} = 3\\,\\text{jam} $$
+                <br>
+                $$ V_{\\text{pagi}} = ${lajuPagi.toFixed(0)} \\times 4 = ${formatNumber(volumePagi)} \\, \\text{Liter} $$
+                $$ V_{\\text{siang}} = ${lajuSiang.toFixed(0)} \\times 3 = ${formatNumber(volumeSiang)} \\, \\text{Liter} $$
+                $$ V_{\\text{sore}} = ${lajuSore.toFixed(0)} \\times 3 = ${formatNumber(volumeSore)} \\, \\text{Liter} $$
+                <br>
+                $$ V_{\\text{total}} = ${formatNumber(volumePagi)} + ${formatNumber(volumeSiang)} + ${formatNumber(volumeSore)} = ${formatNumber(totalVolumeAir)} \\, \\text{Liter} $$
+                <br><br>
+                $$ \\text{Air per warga} = \\frac{V_{\\text{total}}}{\\text{Jumlah Warga}} = \\frac{${formatNumber(totalVolumeAir)}}{${jumlahWarga}} = ${formatNumber(airPerWarga)} \\, \\text{Liter/orang} $$
+                $$ \\text{Air per truk} = \\frac{V_{\\text{total}}}{\\text{Total Truk}} = \\frac{${formatNumber(totalVolumeAir)}}{${totalTrukTersedia}} = ${formatNumber(airPerTruk)} \\, \\text{Liter/truk} $$
+            `;
+            if (window.renderMathInElement) {
+                window.renderMathInElement(rumusDiv, {
+                    delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]
+                });
+            }
+        }
+        
+        let stepDiv = document.getElementById('stepIntegral');
+        stepDiv.innerHTML = `
+            🧮 <strong>LANGKAH PERHITUNGAN INTEGRAL TERTENTU (OTOMATIS):</strong><br>
+            📌 <strong>Data Input:</strong> ${formatNumber(jumlahWarga)} warga | ${formatNumber(trukPerSesi)} truk/sesi | ${formatNumber(kapasitasTruk)} liter/truk<br>
+            📌 <strong>Perhitungan Laju Aliran Otomatis:</strong><br>
+            &nbsp;&nbsp;• Kebutuhan per warga = 100 liter/hari → total kebutuhan = ${formatNumber(jumlahWarga * 100)} liter/hari<br>
+            &nbsp;&nbsp;• Ditambah kehilangan 20% → ${formatNumber(jumlahWarga * 100 * 1.2)} liter/hari<br>
+            &nbsp;&nbsp;• Laju rata-rata = ${formatNumber(jumlahWarga * 100 * 1.2 / 10)} liter/jam<br>
+            &nbsp;&nbsp;• Laju Pagi (105% x rata-rata) = ${formatNumber(lajuPagi)} L/jam<br>
+            &nbsp;&nbsp;• Laju Siang (85% x rata-rata) = ${formatNumber(lajuSiang)} L/jam<br>
+            &nbsp;&nbsp;• Laju Sore (110% x rata-rata) = ${formatNumber(lajuSore)} L/jam<br>
+            📌 <strong>Hasil Volume (Integral Q × t):</strong><br>
+            &nbsp;&nbsp;• V_pagi = ∫₀⁴ Q_pagi dt = ${formatNumber(lajuPagi)} × 4 = <strong>${formatNumber(volumePagi)} liter</strong><br>
+            &nbsp;&nbsp;• V_siang = ∫₄⁷ Q_siang dt = ${formatNumber(lajuSiang)} × 3 = <strong>${formatNumber(volumeSiang)} liter</strong><br>
+            &nbsp;&nbsp;• V_sore = ∫₇¹⁰ Q_sore dt = ${formatNumber(lajuSore)} × 3 = <strong>${formatNumber(volumeSore)} liter</strong><br>
+            📌 <strong>Total Volume:</strong> V_total = ${formatNumber(volumePagi)} + ${formatNumber(volumeSiang)} + ${formatNumber(volumeSore)} = <strong>${formatNumber(totalVolumeAir)} Liter</strong><br>
+            📌 <strong>Distribusi:</strong> Air per warga = ${formatNumber(totalVolumeAir)} / ${formatNumber(jumlahWarga)} = ${formatNumber(airPerWarga)} Liter/orang<br>
+            📌 <strong>Logistik:</strong> ${formatNumber(totalTrukTersedia)} truk tersedia (${formatNumber(trukPerSesi)} truk/sesi × 3 sesi) → butuh <strong>${formatNumber(totalTrukDibutuhkan)} truk</strong> untuk mengangkut ${formatNumber(totalVolumeAir)} Liter.
+        `;
+        
+        let existingWarn = document.getElementById('warningTooltip');
+        if (airPerTruk > kapasitasTruk && kapasitasTruk > 0) {
+            if (!existingWarn) {
+                let warn = document.createElement('div');
+                warn.id = 'warningTooltip';
+                warn.style.fontSize = '0.8rem';
+                warn.style.color = '#b64926';
+                warn.style.marginTop = '8px';
+                warn.style.textAlign = 'center';
+                warn.style.background = '#ffecb3';
+                warn.style.padding = '8px';
+                warn.style.borderRadius = '20px';
+                warn.style.fontWeight = 'bold';
+                warn.innerHTML = '⚠️ PERHATIAN: Air per truk melebihi kapasitas maksimal truk. Pertimbangkan menambah jumlah truk per sesi atau memperbesar kapasitas truk.';
+                document.querySelector('.kalkulus-section').appendChild(warn);
+                setTimeout(() => { if(warn) warn.remove(); }, 5000);
+            }
+        } else {
+            if(existingWarn) existingWarn.remove();
+        }
     }
 
     function updateChart(volPagi, volSiang, volSore) {
@@ -423,105 +594,18 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toLocaleString()} Liter` } } },
+                plugins: { 
+                    tooltip: { 
+                        callbacks: { 
+                            label: (ctx) => `${formatNumber(ctx.raw)} Liter` 
+                        } 
+                    } 
+                },
                 scales: { y: { beginAtZero: true, title: { display: true, text: 'Volume (Liter)' } } }
             }
         });
     }
 
-    function updateRumusDinamis(lajuP, lajuS, lajuSo, volP, volSi, volSo, totalVolume, jmlWarga, totalTruk, airPerWargaVal, airPerTrukVal) {
-        const rumusDiv = document.querySelector('.rumus-lengkap');
-        if (rumusDiv) {
-            rumusDiv.innerHTML = `
-                $$ V_{\\text{total}} = \\int_{0}^{T} Q(t) \\, dt = \\sum_{i=1}^{3} \\left( \\int_{t_{i-1}}^{t_i} Q_i \\, dt \\right) $$
-                <br><br>
-                $$ \\text{Diketahui: } Q_{\\text{pagi}} = ${lajuP.toFixed(0)} \\, \\text{L/jam},\\ Q_{\\text{siang}} = ${lajuS.toFixed(0)} \\, \\text{L/jam},\\ Q_{\\text{sore}} = ${lajuSo.toFixed(0)} \\, \\text{L/jam} $$
-                $$ \\Delta t_{\\text{pagi}} = 4\\,\\text{jam},\\ \\Delta t_{\\text{siang}} = 3\\,\\text{jam},\\ \\Delta t_{\\text{sore}} = 3\\,\\text{jam} $$
-                <br>
-                $$ V_{\\text{pagi}} = ${lajuP.toFixed(0)} \\times 4 = ${volP.toFixed(1)} \\, \\text{Liter} $$
-                $$ V_{\\text{siang}} = ${lajuS.toFixed(0)} \\times 3 = ${volSi.toFixed(1)} \\, \\text{Liter} $$
-                $$ V_{\\text{sore}} = ${lajuSo.toFixed(0)} \\times 3 = ${volSo.toFixed(1)} \\, \\text{Liter} $$
-                <br>
-                $$ V_{\\text{total}} = ${volP.toFixed(1)} + ${volSi.toFixed(1)} + ${volSo.toFixed(1)} = ${totalVolume.toFixed(1)} \\, \\text{Liter} $$
-                <br><br>
-                $$ \\text{Air per warga} = \\frac{V_{\\text{total}}}{\\text{Jumlah Warga}} = \\frac{${totalVolume.toFixed(1)}}{${jmlWarga}} = ${airPerWargaVal.toFixed(2)} \\, \\text{Liter/orang} $$
-                $$ \\text{Air per truk} = \\frac{V_{\\text{total}}}{\\text{Total Truk}} = \\frac{${totalVolume.toFixed(1)}}{${totalTruk}} = ${airPerTrukVal.toFixed(2)} \\, \\text{Liter/truk} $$
-            `;
-            if (window.renderMathInElement) {
-                window.renderMathInElement(rumusDiv, {
-                    delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]
-                });
-            }
-        }
-    }
-
-    function hitungDistribusiAir() {
-        let jumlahWarga = parseFloat(document.getElementById('jumlahWarga').value);
-        let trukPerSesi = parseInt(document.getElementById('trukPerSesi').value);
-        let kapasitasTruk = parseFloat(document.getElementById('kapasitasTruk').value);
-        let lajuPagi = parseFloat(document.getElementById('lajuPagi').value);
-        let lajuSiang = parseFloat(document.getElementById('lajuSiang').value);
-        let lajuSore = parseFloat(document.getElementById('lajuSore').value);
-
-        if (isNaN(jumlahWarga) || jumlahWarga <= 0) jumlahWarga = 1;
-        if (isNaN(trukPerSesi) || trukPerSesi <= 0) trukPerSesi = 1;
-        if (isNaN(kapasitasTruk) || kapasitasTruk <= 0) kapasitasTruk = 1000;
-        if (isNaN(lajuPagi)) lajuPagi = 0;
-        if (isNaN(lajuSiang)) lajuSiang = 0;
-        if (isNaN(lajuSore)) lajuSore = 0;
-
-        const durasiPagi = 4, durasiSiang = 3, durasiSore = 3;
-        let volumePagi = lajuPagi * durasiPagi;
-        let volumeSiang = lajuSiang * durasiSiang;
-        let volumeSore = lajuSore * durasiSore;
-        let totalVolumeAir = volumePagi + volumeSiang + volumeSore;
-
-        let totalTrukTersedia = trukPerSesi * 3;
-        let airPerTruk = totalTrukTersedia > 0 ? totalVolumeAir / totalTrukTersedia : 0;
-        let airPerWarga = jumlahWarga > 0 ? totalVolumeAir / jumlahWarga : 0;
-        let totalTrukDibutuhkan = Math.ceil(totalVolumeAir / kapasitasTruk);
-        
-        document.getElementById('totalVolumeLiter').innerHTML = totalVolumeAir.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Liter";
-        document.getElementById('airPerTruk').innerHTML = airPerTruk.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Liter";
-        document.getElementById('airPerWarga').innerHTML = airPerWarga.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Liter";
-        document.getElementById('totalTrukTerpakai').innerHTML = totalTrukDibutuhkan + " Truk";
-        
-        updateChart(volumePagi, volumeSiang, volumeSore);
-        updateRumusDinamis(lajuPagi, lajuSiang, lajuSore, volumePagi, volumeSiang, volumeSore, totalVolumeAir, jumlahWarga, totalTrukTersedia, airPerWarga, airPerTruk);
-        
-        let stepDiv = document.getElementById('stepIntegral');
-        stepDiv.innerHTML = `
-            🧮 <strong>LANGKAH PERHITUNGAN INTEGRAL TERTENTU:</strong><br>
-            • Sesi Pagi: V₁ = ∫₀⁴ Q₁ dt = ${lajuPagi.toFixed(0)} × 4 = <strong>${volumePagi.toFixed(1)} liter</strong><br>
-            • Sesi Siang: V₂ = ∫₄⁷ Q₂ dt = ${lajuSiang.toFixed(0)} × 3 = <strong>${volumeSiang.toFixed(1)} liter</strong><br>
-            • Sesi Sore: V₃ = ∫₇¹⁰ Q₃ dt = ${lajuSore.toFixed(0)} × 3 = <strong>${volumeSore.toFixed(1)} liter</strong><br>
-            • Total Volume (Hasil Integral): V_total = ${volumePagi.toFixed(1)} + ${volumeSiang.toFixed(1)} + ${volumeSore.toFixed(1)} = <strong>${totalVolumeAir.toFixed(1)} Liter</strong><br>
-            • Distribusi: Air per warga = ${totalVolumeAir.toFixed(1)} / ${jumlahWarga} = ${airPerWarga.toFixed(2)} Liter/orang.<br>
-            • Logistik: ${totalTrukTersedia} truk tersedia (${trukPerSesi} truk/sesi), kapasitas ${kapasitasTruk} Liter/truk → butuh ${totalTrukDibutuhkan} truk untuk mengangkut ${totalVolumeAir.toFixed(1)} Liter.
-        `;
-        
-        let existingWarn = document.getElementById('warningTooltip');
-        if (airPerTruk > kapasitasTruk && kapasitasTruk > 0) {
-            if (!existingWarn) {
-                let warn = document.createElement('div');
-                warn.id = 'warningTooltip';
-                warn.style.fontSize = '0.7rem';
-                warn.style.color = '#b64926';
-                warn.style.marginTop = '8px';
-                warn.style.textAlign = 'center';
-                warn.style.background = '#ffecb3';
-                warn.style.padding = '5px';
-                warn.style.borderRadius = '20px';
-                warn.innerHTML = '⚠️ PERHATIAN: Air per truk melebihi kapasitas maksimal truk. Pertimbangkan menambah jumlah truk per sesi atau memperbesar kapasitas truk.';
-                document.querySelector('.kalkulus-section').appendChild(warn);
-                setTimeout(() => { if(warn) warn.remove(); }, 5000);
-            }
-        } else {
-            if(existingWarn) existingWarn.remove();
-        }
-    }
-
-    // Event listener untuk tombol pemilih sesi (pagi, siang, sore)
     function initSessionSelector() {
         const btns = document.querySelectorAll('.time-btn');
         btns.forEach(btn => {
@@ -530,8 +614,6 @@
                 if (session) {
                     currentSession = session;
                     updateUIBasedOnSession(session);
-                    // Tidak perlu mengubah perhitungan, hanya mengubah tampilan jam.
-                    // Perhitungan tetap menggunakan semua sesi.
                 }
             });
         });
@@ -545,7 +627,7 @@
         const btn = document.getElementById('hitungIntegralBtn');
         btn.addEventListener('click', hitungDistribusiAir);
         
-        const inputs = ['jumlahWarga', 'trukPerSesi', 'kapasitasTruk', 'lajuPagi', 'lajuSiang', 'lajuSore'];
+        const inputs = ['jumlahWarga', 'trukPerSesi', 'kapasitasTruk'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             el.addEventListener('input', () => hitungDistribusiAir());
